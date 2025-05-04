@@ -1,5 +1,5 @@
 #[starknet::interface]
-trait ICounter<TContractState> {
+pub trait ICounter<TContractState> {
     fn get_counter(self: @TContractState) -> u32;
     fn increase_counter(ref self: TContractState);
     fn decrease_counter(ref self: TContractState);
@@ -69,6 +69,7 @@ pub mod Counter {
     fn constructor(ref self: ContractState, init_value: u32, owner: ContractAddress) {
         self.counter.write(init_value);
         //initialize owner
+        // self.ownable.initializer(get_caller_address()); //UDC  here you loss control of the contract because of the UDC
         self.ownable.initializer(owner);
     }
 

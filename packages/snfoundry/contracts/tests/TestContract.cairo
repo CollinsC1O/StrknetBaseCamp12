@@ -1,1 +1,42 @@
+use openzeppelin_access::ownable::interface::IOwnableDispatcherTrait;
+// Import libraries
+use snforge_std::{declare, DeclareResultTrait, ContractClassTrait};
+use starknet::{ContractAddress};
+use contracts::Counter::{ICounterDispatcher, ICounterDispatcherTrait}; 
+use openzeppelin_access::ownable::interface::{IOwnableDispatcher, IOwnableCamelOnlyDispatcherTrait};
 
+const ZERO_COUNT: u32 = 0;
+
+// define owner
+fn OWNER() -> ContractAddress {
+ 'OWNER'.try_into().expect('expect owner')
+}
+
+// deploy util function
+fn deploy(initial_count: u32) -> (ICounterDispatcher, IOwnableDispatcher){
+    //declare contract
+    let class_hash = declare("Counter").expect('failed to declare').contract_class();
+
+    //serialize constructor
+    let mut calldata: Array<felt252> = array![];
+    initial_count.serialize(ref calldata);
+    OWNER().serialize(ref calldata);
+
+    // deploy contract
+    let (contract_address, _) = class_hash.deploy(@calldata).expect('failed to deploy');
+
+    let counter = ICounterDispatcher{contract_address: contract_address};
+    let ownable = IOwnableDispatcher{contract_address: contract_address};
+
+    (counter, ownable)
+}
+
+ #[test]
+ fn test_counter_deployment(){
+    let (counter, ownable) = deploy(ZERO_COUNT);
+
+    let count_1 = counter.get_counter();
+
+    assert(count_1 == ZERO_COUNT, 'count not set');
+    assert(ownable.owner() == OWNER(), 'owner not set')
+ }
