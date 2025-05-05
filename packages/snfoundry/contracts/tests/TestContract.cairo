@@ -1,9 +1,8 @@
-use openzeppelin_access::ownable::interface::IOwnableDispatcherTrait;
 // Import libraries
 use snforge_std::{declare, DeclareResultTrait, ContractClassTrait};
 use starknet::{ContractAddress};
 use contracts::Counter::{ICounterDispatcher, ICounterDispatcherTrait}; 
-use openzeppelin_access::ownable::interface::{IOwnableDispatcher, IOwnableCamelOnlyDispatcherTrait};
+use openzeppelin_access::ownable::interface::{IOwnableDispatcher, IOwnableDispatcherTrait};
 
 const ZERO_COUNT: u32 = 0;
 
@@ -13,7 +12,7 @@ fn OWNER() -> ContractAddress {
 }
 
 // deploy util function
-fn deploy(initial_count: u32) -> (ICounterDispatcher, IOwnableDispatcher){
+fn _deploy_(initial_count: u32) -> (ICounterDispatcher, IOwnableDispatcher){
     //declare contract
     let class_hash = declare("Counter").expect('failed to declare').contract_class();
 
@@ -33,10 +32,27 @@ fn deploy(initial_count: u32) -> (ICounterDispatcher, IOwnableDispatcher){
 
  #[test]
  fn test_counter_deployment(){
-    let (counter, ownable) = deploy(ZERO_COUNT);
-
+    let (counter, ownable) = _deploy_(ZERO_COUNT);
+    // get current count
     let count_1 = counter.get_counter();
 
     assert(count_1 == ZERO_COUNT, 'count not set');
     assert(ownable.owner() == OWNER(), 'owner not set')
+
+ }
+
+ #[test]
+ fn test_increase_count() {
+    let (counter, ownable) = _deploy_(ZERO_COUNT);
+
+      // get current count
+      let count_1 = counter.get_counter();
+
+      assert(count_1 == ZERO_COUNT, 'count not set');
+
+      counter.increase_counter();
+
+      //retrieve current count
+      let count_2 = counter.get_counter();  
+      assert(count_2 == count_1 + 1, 'failed to increase count');
  }
