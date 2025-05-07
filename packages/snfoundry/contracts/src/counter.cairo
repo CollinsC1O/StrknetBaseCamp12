@@ -74,6 +74,7 @@ pub mod Counter {
         self.ownable.initializer(owner);
     }
 
+    #[abi(embed_v0)]
     impl CounterImpl of ICounter<ContractState> {
         fn get_counter(self: @ContractState) -> u32 {
             self.counter.read()
