@@ -120,6 +120,17 @@ fn test_safe_panic_decrease_counter() {
 
 }
 
+#[test]
+#[should_panic(expected: 'Decrease empty counter')]
+fn test_panic_decrease_counter() {
+   let (counter, _, safe_dispatcher) = _deploy_(ZERO_COUNT);
+
+   //asserting that counter is set to zero
+   assert(counter.get_counter() == ZERO_COUNT, 'invalid count');
+
+   // trying to decrease below zero here 
+   counter.decrease_counter(); 
+}
 
 // #[ignore]
 // #[test]
