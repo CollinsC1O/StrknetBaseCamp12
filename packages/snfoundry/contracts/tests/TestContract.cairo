@@ -40,7 +40,7 @@ fn _deploy_(initial_count: u32) -> (ICounterDispatcher, IOwnableDispatcher, ICou
     (counter, ownable, safe_dispatcher)
 }
 
-#[ignore]
+
 #[test]
 fn test_counter_deployment() {
     let (counter, ownable, _) = _deploy_(ZERO_COUNT);
@@ -51,7 +51,7 @@ fn test_counter_deployment() {
     assert(ownable.owner() == OWNER(), 'owner not set')
 }
 
-#[ignore]
+
 #[test]
 fn test_increase_count() {
     let (counter, _, _) = _deploy_(ZERO_COUNT);
@@ -123,7 +123,7 @@ fn test_safe_panic_decrease_counter() {
 #[test]
 #[should_panic(expected: 'Decrease empty counter')]
 fn test_panic_decrease_counter() {
-   let (counter, _, safe_dispatcher) = _deploy_(ZERO_COUNT);
+   let (counter, _, _) = _deploy_(ZERO_COUNT);
 
    //asserting that counter is set to zero
    assert(counter.get_counter() == ZERO_COUNT, 'invalid count');
@@ -131,6 +131,13 @@ fn test_panic_decrease_counter() {
    // trying to decrease below zero here 
    counter.decrease_counter(); 
 }
+
+
+// #[test]
+// fn test_success() {
+
+// }
+
 
 // #[ignore]
 // #[test]
