@@ -1,5 +1,9 @@
+use Counter::super::ICounterSafeDispatcherTrait;
 use contracts::Counter::Counter;
-use contracts::Counter::{ICounterDispatcher, ICounterDispatcherTrait};
+use contracts::Counter::{
+    ICounterDispatcher, ICounterDispatcherTrait, ICounterSafeDispatcher,
+    ICounterSafeDispatcherTrait,
+};
 use openzeppelin_access::ownable::interface::{IOwnableDispatcher, IOwnableDispatcherTrait};
 use snforge_std::EventSpyAssertionsTrait;
 // Import libraries
@@ -21,7 +25,9 @@ fn USER_1() -> ContractAddress {
 }
 
 // deploy util function
-fn _deploy_(initial_count: u32) -> (ICounterDispatcher, IOwnableDispatcher) {
+fn _deploy_(
+    initial_count: u32,
+) -> (ICounterDispatcher, IOwnableDispatcher, ICounterSafeDispatcher) {
     //declare contract
     let class_hash = declare("Counter").expect('failed to declare').contract_class();
 
@@ -35,14 +41,15 @@ fn _deploy_(initial_count: u32) -> (ICounterDispatcher, IOwnableDispatcher) {
 
     let counter = ICounterDispatcher { contract_address: contract_address };
     let ownable = IOwnableDispatcher { contract_address: contract_address };
+    let safe_dispatcher = ICounterSafeDispatcher { contract_address: contract_address };
 
-    (counter, ownable)
+    (counter, ownable, safe_dispatcher)
 }
 
 #[ignore]
 #[test]
 fn test_counter_deployment() {
-    let (counter, ownable) = _deploy_(ZERO_COUNT);
+    let (counter, ownable, _) = _deploy_(ZERO_COUNT);
     // get current count
     let count_1 = counter.get_counter();
 
@@ -53,7 +60,7 @@ fn test_counter_deployment() {
 #[ignore]
 #[test]
 fn test_increase_count() {
-    let (counter, _) = _deploy_(ZERO_COUNT);
+    let (counter, _, _) = _deploy_(ZERO_COUNT);
 
     // get current count
     let count_1 = counter.get_counter();
@@ -69,7 +76,7 @@ fn test_increase_count() {
 
 #[test]
 fn test_emitted_event() {
-    let (counter, _) = _deploy_(ZERO_COUNT);
+    let (counter, _, _) = _deploy_(ZERO_COUNT);
     let mut spy = spy_events();
 
     // mock a caller  // to simulate the person calling the increase counnt function
@@ -95,13 +102,30 @@ fn test_emitted_event() {
         .assert_not_emitted(
             @array![
                 (
-                  counter.contract_address,
-                  Counter::Event::Decrease(Counter::Decrease { account: USER_1() }),
-                )
+                    counter.contract_address,
+                    Counter::Event::Decrease(Counter::Decrease { account: USER_1() }),
+                ),
             ],
         )
 }
 
+
+#[test]
+#[feature("safe_dispatcher")]
+fn test_safe_panic_decrease_counter() {
+    let (counter, _, safe_dispatcher) = _deploy_(ZERO_COUNT);
+
+    //asserting that counter is set to zero
+    assert(counter.get_counter() == ZERO_COUNT, 'invalid count');
+
+    // ensuring that count can't be reduced below zero
+    match safe_dispatcher.decrease_counter() {
+        Result::Ok(_) => panic!("can not decrease to 0"),
+        Result::Err(e) => assert(
+            *e[0] == 'Decrease empty counter', *e.at(0),
+        ) // this error(e) returns an array, we need the first index
+    }
+}
 // #[ignore]
 // #[test]
 // fn test_decrease_count() {
@@ -117,3 +141,4 @@ fn test_emitted_event() {
 
 //     assert(count_2 == count_1 - 1, 'failed to decrease count')
 // }
+
