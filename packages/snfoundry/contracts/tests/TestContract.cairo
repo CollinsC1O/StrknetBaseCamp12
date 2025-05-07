@@ -171,3 +171,21 @@ fn test_successful_reset_counter() {
     let final_count = counter.get_counter();
     assert(final_count == 0, 'invalid reset count');
 }
+
+#[test]
+#[feature("safe_dispatcher")]
+fn test_safe_panic_reset_by_non_owner() {
+    let (counter, _, safe_dispatcher) = _deploy_(ZERO_COUNT);
+
+    //asserting that counter is set to zero
+    assert(counter.get_counter() == ZERO_COUNT, 'invalid count');
+
+    start_cheat_caller_address(counter.contract_address, USER_1());
+    // ensuring that count can't be reduced below zero
+    match safe_dispatcher.reset_counter() {
+        Result::Ok(_) => panic!("can not reset"),
+        Result::Err(e) => assert(
+            *e[0] == 'Caller is not the owner', *e.at(0),
+        ) // this error(e) returns an array, we need the first index
+    }
+}
