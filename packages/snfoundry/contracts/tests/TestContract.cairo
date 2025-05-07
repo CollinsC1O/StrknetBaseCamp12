@@ -140,7 +140,7 @@ fn test_panic_decrease_counter() {
 
 
 #[test]
-fn test_success_decrease_counter() {
+fn test_successful_decrease_counter() {
     let (counter, _, _) = _deploy_(5);
 
     let count_1 = counter.get_counter();
@@ -152,19 +152,17 @@ fn test_success_decrease_counter() {
     let final_count = counter.get_counter();
     assert(final_count == count_1 - 1, 'invalid decrease count');
 }
-// #[ignore]
-// #[test]
-// fn test_decrease_count() {
-//     let (counter, _) = _deploy_(ZERO_COUNT);
 
-//     let count_1 = counter.get_counter();
+#[test]
+fn test_successful_reset_counter() {
+    let (counter, _, _) = _deploy_(5);
 
-//     assert(count_1 == count_1 + 1, 'invalid count');
+    let count_1 = counter.get_counter();
+    //asserting that counter is set to zero
+    assert(count_1 == 5, 'invalid count');
 
-//     counter.decrease_counter();
+    counter.reset_counter();
 
-//     let count_2 = counter.get_counter();
-
-//     assert(count_2 == count_1 - 1, 'failed to decrease count')
-// }
-
+    let final_count = counter.get_counter();
+    assert(final_count == 0, 'invalid reset count');
+}
