@@ -1,3 +1,4 @@
+// Import libraries
 use contracts::Counter::Counter;
 use contracts::Counter::{
     ICounterDispatcher, ICounterDispatcherTrait, ICounterSafeDispatcher,
@@ -5,7 +6,6 @@ use contracts::Counter::{
 };
 use openzeppelin_access::ownable::interface::{IOwnableDispatcher, IOwnableDispatcherTrait};
 use snforge_std::EventSpyAssertionsTrait;
-// Import libraries
 use snforge_std::{
     ContractClassTrait, DeclareResultTrait, declare, spy_events, start_cheat_caller_address,
     stop_cheat_caller_address,
@@ -161,8 +161,13 @@ fn test_successful_reset_counter() {
     //asserting that counter is set to zero
     assert(count_1 == 5, 'invalid count');
 
+    //using start and stop cheat caller to prank/simulate the owner
+    start_cheat_caller_address(counter.contract_address, OWNER());
+    //reset count to zero
     counter.reset_counter();
+    stop_cheat_caller_address(counter.contract_address);
 
+   //get the current count
     let final_count = counter.get_counter();
     assert(final_count == 0, 'invalid reset count');
 }
