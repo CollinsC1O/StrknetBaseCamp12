@@ -55,13 +55,13 @@ pub mod Counter {
 
     #[derive(Drop, starknet::Event)]
     pub struct Increase {
-        account: ContractAddress,
+        pub account: ContractAddress,
     }
 
 
     #[derive(Drop, starknet::Event)]
     pub struct Decrease {
-        account: ContractAddress,
+        pub account: ContractAddress,
     }
 
 
@@ -69,7 +69,8 @@ pub mod Counter {
     fn constructor(ref self: ContractState, init_value: u32, owner: ContractAddress) {
         self.counter.write(init_value);
         //initialize owner
-        // self.ownable.initializer(get_caller_address()); //UDC  here you loss control of the contract because of the UDC
+        // self.ownable.initializer(get_caller_address()); //UDC  here you loss control of the
+        // contract because of the UDC
         self.ownable.initializer(owner);
     }
 
