@@ -1,9 +1,5 @@
-use Counter::super::ICounterSafeDispatcherTrait;
 use contracts::Counter::Counter;
-use contracts::Counter::{
-    ICounterDispatcher, ICounterDispatcherTrait, ICounterSafeDispatcher,
-    ICounterSafeDispatcherTrait,
-};
+use contracts::Counter::{ICounterDispatcher, ICounterDispatcherTrait, ICounterSafeDispatcher, ICounterSafeDispatcherTrait};
 use openzeppelin_access::ownable::interface::{IOwnableDispatcher, IOwnableDispatcherTrait};
 use snforge_std::EventSpyAssertionsTrait;
 // Import libraries
@@ -25,9 +21,7 @@ fn USER_1() -> ContractAddress {
 }
 
 // deploy util function
-fn _deploy_(
-    initial_count: u32,
-) -> (ICounterDispatcher, IOwnableDispatcher, ICounterSafeDispatcher) {
+fn _deploy_(initial_count: u32) -> (ICounterDispatcher, IOwnableDispatcher, ICounterSafeDispatcher) {
     //declare contract
     let class_hash = declare("Counter").expect('failed to declare').contract_class();
 
@@ -102,9 +96,9 @@ fn test_emitted_event() {
         .assert_not_emitted(
             @array![
                 (
-                    counter.contract_address,
-                    Counter::Event::Decrease(Counter::Decrease { account: USER_1() }),
-                ),
+                  counter.contract_address,
+                  Counter::Event::Decrease(Counter::Decrease { account: USER_1() }),
+                )
             ],
         )
 }
@@ -113,19 +107,20 @@ fn test_emitted_event() {
 #[test]
 #[feature("safe_dispatcher")]
 fn test_safe_panic_decrease_counter() {
-    let (counter, _, safe_dispatcher) = _deploy_(ZERO_COUNT);
+   let (counter, _, safe_dispatcher) = _deploy_(ZERO_COUNT);
 
-    //asserting that counter is set to zero
-    assert(counter.get_counter() == ZERO_COUNT, 'invalid count');
+   //asserting that counter is set to zero
+   assert(counter.get_counter() == ZERO_COUNT, 'invalid count');
 
-    // ensuring that count can't be reduced below zero
-    match safe_dispatcher.decrease_counter() {
-        Result::Ok(_) => panic!("can not decrease to 0"),
-        Result::Err(e) => assert(
-            *e[0] == 'Decrease empty counter', *e.at(0),
-        ) // this error(e) returns an array, we need the first index
-    }
+   // ensuring that count can't be reduced below zero
+   match safe_dispatcher.decrease_counter() {
+      Result::Ok(_) => panic!("can not decrease to 0"),
+      Result::Err(e) => assert(*e[0] == 'Decrease empty counter', *e.at(0)) // this error(e) returns an array, we need the first index
+   }
+
 }
+
+
 // #[ignore]
 // #[test]
 // fn test_decrease_count() {
@@ -141,4 +136,3 @@ fn test_safe_panic_decrease_counter() {
 
 //     assert(count_2 == count_1 - 1, 'failed to decrease count')
 // }
-
